@@ -39,7 +39,7 @@ router.post("/", middleware, async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", middleware, async (req, res) => {
   try {
     let page = req.params.page || 1;
     let limit = parseInt(req.query.limit) || 5;
@@ -53,6 +53,50 @@ router.get("/", async (req, res) => {
     let total = await Book.countDocuments();
     let totalPages = Math.ceil(total / limit);
     res.status(200).json({ books, currentPage: page, total, totalPages });
+  } catch (error) {
+    console.log(error.toString());
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+router.delete("/:id", middleware, async (req, res) => {
+  try {
+    let bookID = req.params.id;
+    let book = await Book.findById(bookID);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    if (book.user.toString() !== req.userID) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // delete the image from cloudinary
+    if (book.image && book.image.includes("cloudinary")) {
+      try {
+        let publicID = book.image
+          .split("/")
+          [book.image.split("/").length - 1].split(".")[0];
+        await cloudinary.uploader.destroy(publicID);
+        console.log("Image deleted from cloudinary");
+      } catch (error) {
+        console.log("Error deleting image from cloudinary", error);
+        return res
+          .status(500)
+          .json({ message: "Error deleting image from cloudinary" });
+      }
+    }
+
+    await book.deleteOne();
+  } catch (error) {
+    console.log(error.toString());
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+router.get("/user", middleware, async (req, res) => {
+  try {
+    let books = await Book.find({ user: req.userID }).sort({ createdAt: -1 });
+    res.status(200).json(books);
   } catch (error) {
     console.log(error.toString());
     res.status(500).json({ message: "An error occurred", error });
