@@ -100,7 +100,7 @@ const login = () => {
           {/* Footer */}
           <View style={style.footer}>
             <Text style={style.footerText}>Don't have an account?</Text>
-            <Link href='/signup' style={style.signupLink}>
+            <Link href='/signup' style={style.signupLink} asChild>
               <Text style={style.signupLinkText}>Sign Up</Text>
             </Link>
           </View>
