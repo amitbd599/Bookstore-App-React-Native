@@ -1,9 +1,16 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState } from "react";
 import style from "../../assets/style/login.styles";
 import { Image } from "expo-image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import COLORS from "../../constants/colors";
+import { Link } from "expo-router";
 
 const login = () => {
   const [email, setEmail] = useState("");
@@ -75,6 +82,27 @@ const login = () => {
                 />
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* button */}
+          <TouchableOpacity
+            style={style.button}
+            onPress={handelLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color='#fff' />
+            ) : (
+              <Text style={style.buttonText}>Login</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Footer */}
+          <View style={style.footer}>
+            <Text style={style.footerText}>Don't have an account?</Text>
+            <Link href='/signup' style={style.signupLink}>
+              <Text style={style.signupLinkText}>Sign Up</Text>
+            </Link>
           </View>
         </View>
       </View>
