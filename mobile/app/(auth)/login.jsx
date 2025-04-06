@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import style from "../../assets/style/login.styles";
@@ -13,14 +14,23 @@ import { Image } from "expo-image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import COLORS from "../../constants/colors";
 import { Link } from "expo-router";
+import { useAuthStore } from "../../store/authStore";
 
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  let { login, user, token, isLoading } = useAuthStore();
 
-  let handelLogin = () => {};
+  let handelLogin = async () => {
+    console.log(email, password);
+    let result = await login(email, password);
+
+    if (!result.success) {
+      Alert.alert("Error", result.error);
+      return;
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -52,7 +62,7 @@ const login = () => {
                   placeholder='Enter your email'
                   placeholderTextColor={COLORS.placeholderText}
                   value={email}
-                  onChange={setEmail}
+                  onChangeText={setEmail}
                   autoCapitalize='none'
                 />
               </View>
@@ -72,7 +82,7 @@ const login = () => {
                   placeholder='Enter your password'
                   placeholderTextColor={COLORS.placeholderText}
                   value={password}
-                  onChange={setPassword}
+                  onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity

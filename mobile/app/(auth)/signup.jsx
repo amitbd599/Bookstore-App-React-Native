@@ -5,22 +5,32 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Alert,
   Platform,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import style from "../../assets/style/login.styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import COLORS from "../../constants/colors";
 import { Link } from "expo-router";
+import { useAuthStore } from "../../store/authStore";
 
 const signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  let handelLogin = () => {};
+  let { register, user, token, isLoading } = useAuthStore();
+
+  let handelRegister = async () => {
+    console.log(userName, email, password);
+    let result = await register(userName, email, password);
+    if (!result.success) {
+      Alert.alert("Error", result.error);
+      return;
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -52,7 +62,7 @@ const signup = () => {
                   placeholder='Enter user name'
                   placeholderTextColor={COLORS.placeholderText}
                   value={userName}
-                  onChange={setUserName}
+                  onChangeText={setUserName}
                   autoCapitalize='none'
                 />
               </View>
@@ -72,7 +82,7 @@ const signup = () => {
                   placeholder='Enter your email'
                   placeholderTextColor={COLORS.placeholderText}
                   value={email}
-                  onChange={setEmail}
+                  onChangeText={setEmail}
                   autoCapitalize='none'
                 />
               </View>
@@ -92,7 +102,7 @@ const signup = () => {
                   placeholder='Enter your password'
                   placeholderTextColor={COLORS.placeholderText}
                   value={password}
-                  onChange={setPassword}
+                  onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
@@ -112,13 +122,13 @@ const signup = () => {
             {/* button */}
             <TouchableOpacity
               style={style.button}
-              onPress={handelLogin}
+              onPress={handelRegister}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color='#fff' />
               ) : (
-                <Text style={style.buttonText}>Login</Text>
+                <Text style={style.buttonText}>Register</Text>
               )}
             </TouchableOpacity>
 
