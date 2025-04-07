@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -10,7 +12,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-
+import * as ImagePicker from "expo-image-picker";
 import style from "../../assets/style/create.styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import COLORS from "../../constants/colors";
@@ -25,7 +27,29 @@ const create = () => {
 
   let router = useRouter();
 
-  let pickImage = () => {};
+  const pickImage = async () => {
+    try {
+      let { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert("Sorry, we need camera permissions to take photos.");
+        return;
+      }
+      // No permissions request is necessary for launching the image library
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images", "videos"],
+        // allowsEditing: true,
+        // aspect: [4, 3],
+        quality: 1,
+      });
+
+      console.log(result);
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {}
+  };
   let handelSubmit = () => {};
   let renderRatingPicker = () => {
     let stars = [];
