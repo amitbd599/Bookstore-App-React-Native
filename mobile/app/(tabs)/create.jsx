@@ -93,6 +93,29 @@ const create = () => {
               <Text style={style.label}>Your Rating</Text>
               {renderRatingPicker()}
             </View>
+
+            {/* Image */}
+            <View style={style.formGroup}>
+              <Text style={style.label}>Book Image</Text>
+              <TouchableOpacity style={style.imagePicker} onPress={pickImage}>
+                {image ? (
+                  <Image
+                    style={style.previewImage}
+                    source={{ uri: image }}
+                    resizeMode='cover'
+                  />
+                ) : (
+                  <View style={style.placeholderContainer}>
+                    <Ionicons
+                      name='image-outline'
+                      size={40}
+                      color={COLORS.textSecondary}
+                    />
+                    <Text style={style.placeholderText}>Select image</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
