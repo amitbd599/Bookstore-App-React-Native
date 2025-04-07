@@ -24,7 +24,6 @@ const signup = () => {
   let { register, user, token, isLoading } = useAuthStore();
 
   let handelRegister = async () => {
-    console.log(userName, email, password);
     let result = await register(userName, email, password);
     if (!result.success) {
       Alert.alert("Error", result.error);

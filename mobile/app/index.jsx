@@ -11,8 +11,6 @@ export default function Index() {
     checkAuth();
   }, []);
 
-  // console.log(token);
-  // console.log(user);
 
   let logoutFun = () => {
     logout();

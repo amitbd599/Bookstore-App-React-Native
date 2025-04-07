@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   inputContainer: {
+    fontSize: 14,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.inputBackground,

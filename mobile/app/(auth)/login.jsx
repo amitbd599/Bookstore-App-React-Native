@@ -23,7 +23,6 @@ const login = () => {
   let { login, user, token, isLoading } = useAuthStore();
 
   let handelLogin = async () => {
-    console.log(email, password);
     let result = await login(email, password);
 
     if (!result.success) {

@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -16,6 +17,8 @@ import * as ImagePicker from "expo-image-picker";
 import style from "../../assets/style/create.styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import COLORS from "../../constants/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuthStore } from "@/store/authStore";
 
 const create = () => {
   const [title, setTitle] = useState("");
@@ -23,7 +26,9 @@ const create = () => {
   const [rating, setRating] = useState(3);
   const [image, setImage] = useState("");
   const [imageBase64, setImageBase64] = useState("");
-  const [loading, setLoading] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  let { login, token } = useAuthStore();
 
   let router = useRouter();
 
@@ -38,19 +43,30 @@ const create = () => {
       // No permissions request is necessary for launching the image library
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images", "videos"],
-        // allowsEditing: true,
-        // aspect: [4, 3],
-        quality: 1,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        base64: true,
       });
-
-      console.log(result);
 
       if (!result.canceled) {
         setImage(result.assets[0].uri);
       }
-    } catch (error) {}
+
+      if (result.assets[0].base64) {
+        setImageBase64(result.assets[0].base64);
+      } else {
+        let base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+          encoding: "base64",
+        });
+        setImageBase64(base64);
+      }
+    } catch (error) {
+      console.log("Error picking image: ", error);
+      Alert.alert("Error picking image", error.message);
+    }
   };
-  let handelSubmit = () => {};
+
   let renderRatingPicker = () => {
     let stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -71,6 +87,22 @@ const create = () => {
     }
 
     return <View style={style.ratingContainer}>{stars}</View>;
+  };
+
+  let handelSubmit = async () => {
+    if (!title || !caption || !imageBase64 || !rating) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    try {
+      setLoading(true);
+      let uriParts = image.split(".");
+      let fileType = uriParts[uriParts.length - 1];
+      let imageType = fileType
+        ? `image/${fileType.toLocaleLowerCase()}`
+        : "image/jpeg";
+      let imageDataUrl = `data:${imageType};base64,${imageBase64}`;
+    } catch (error) {}
   };
 
   return (
@@ -140,6 +172,42 @@ const create = () => {
                 )}
               </TouchableOpacity>
             </View>
+
+            {/* Caption */}
+            <View style={style.formGroup}>
+              <Text style={style.label}>Book Caption</Text>
+
+              <TextInput
+                style={style.textArea}
+                placeholder='Write your review or thought about this book...'
+                placeholderTextColor={COLORS.placeholderText}
+                value={caption}
+                onChangeText={setCaption}
+                multiline={true}
+              />
+            </View>
+
+            {/* Button */}
+            <TouchableOpacity
+              style={style.button}
+              onPress={handelSubmit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={COLORS.white} />
+              ) : (
+                <>
+                  <Ionicons
+                    name='book-outline'
+                    size={20}
+                    color={COLORS.white}
+                    style={style.buttonIcon}
+                  />
+
+                  <Text style={style.buttonText}>Submit</Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

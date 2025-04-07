@@ -24,7 +24,6 @@ export default function RootLayout() {
     }
   }, [user, token, segments]);
 
-  console.log(segments[0]);
 
   return (
     <SafeAreaProvider>

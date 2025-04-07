@@ -42,7 +42,6 @@ export const useAuthStore = create((set) => ({
 
       let user = userJson ? JSON.parse(userJson) : null;
 
-      console.log(token, user);
 
       set({ token, user });
     } catch (error) {
@@ -83,7 +82,6 @@ export const useAuthStore = create((set) => ({
       return { success: true };
     } catch (error) {
       set({ isLoading: false });
-      console.log(error.message);
       return { success: false, error: error.message };
     } finally {
       set({ isLoading: false });
