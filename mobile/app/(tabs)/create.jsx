@@ -102,7 +102,36 @@ const create = () => {
         ? `image/${fileType.toLocaleLowerCase()}`
         : "image/jpeg";
       let imageDataUrl = `data:${imageType};base64,${imageBase64}`;
-    } catch (error) {}
+      let response = await fetch("http://192.168.0.104:8000/api/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title,
+          caption,
+          rating,
+          image: imageDataUrl,
+        }),
+      });
+      let data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong.");
+      }
+
+      Alert.alert("Success", "Book recommendation submitted successfully.");
+      setTitle("");
+      setCaption("");
+      setImage("");
+      setImageBase64("");
+      setRating(3);
+      setLoading(false);
+      router.push("/");
+    } catch (error) {
+      console.log("Error submitting form: ", error);
+      Alert.alert("Error", "Failed to submit the form. Please try again.");
+    }
   };
 
   return (

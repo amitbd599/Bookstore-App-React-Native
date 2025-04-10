@@ -9,17 +9,18 @@ const router = express.Router();
 router.post("/", middleware, async (req, res) => {
   try {
     let userID = req.userID;
-    console.log(userID);
 
     let { title, caption, image, rating } = req.body;
-    console.log({ title, caption, image, rating });
 
     if (!title || !caption || !image || !rating) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     // upload the image to cloudinary
-    let uploadResponse = await cloudinary.uploader.upload(image);
+    let uploadResponse = await cloudinary.uploader.upload(image, {
+      folder: "book_app",
+      use_filename: true,
+    });
     let imgUrl = uploadResponse.secure_url;
     // save the image to the database
 
