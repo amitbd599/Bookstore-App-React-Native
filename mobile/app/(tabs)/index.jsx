@@ -18,41 +18,58 @@ const index = () => {
       if (refresh) setRefreshing(true);
       else if (pageNum === 1) setLoading(true);
 
-      let response = await fetch(
+      const response = await fetch(
         `http://192.168.0.104:8000/api/book?page=${pageNum}&limit=5`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      let data = await response.json();
-      console.log(data);
 
-      if (!response.ok) {
+      const data = await response.json();
+      console.log(`📦 Page ${pageNum}`, data.books);
+
+      if (!response.ok)
         throw new Error(data.message || "Something went wrong.");
-      }
-      setBooks((prevBooks) => [...prevBooks, ...data.books]);
+
+      setBooks((prev) => {
+        const combined = refresh ? data.books : [...prev, ...data.books];
+        const unique = combined.filter(
+          (book, index, self) =>
+            index === self.findIndex((b) => b._id === book._id)
+        );
+        return unique;
+      });
+
+      setPage(data.currentPage);
       setHasMore(data.currentPage < data.totalPages);
-      setPage(pageNum);
     } catch (error) {
-      console.log(error.toString());
-      setLoading(false);
+      console.error("❌ fetchBooks error:", error.toString());
     } finally {
       if (refresh) setRefreshing(false);
       else setLoading(false);
     }
   };
 
-  let loadMore = async () => {};
+  let loadMore = async () => {
+    console.log("Loading more books...");
+    if (hasMore) {
+      const nextPage = page + 1;
+      await fetchBooks(nextPage);
+    }
+  };
 
   useEffect(() => {
     fetchBooks();
   }, []);
 
-  console.log(books[0]?.user?.profileImage);
+  const uniqueBooks = books.filter(
+    (book, index, self) => index === self.findIndex((b) => b._id === book._id)
+  );
+
+  console.log(uniqueBooks);
 
   let renderItem = ({ item }) => {
     return (
@@ -76,6 +93,9 @@ const index = () => {
             {renderRatingStars(item.rating)}
           </View>
         </View>
+        <View>
+          <Text style={style.caption}>{item.caption}</Text>
+        </View>
       </View>
     );
   };
@@ -98,7 +118,7 @@ const index = () => {
   return (
     <View style={style.container}>
       <FlatList
-        data={books}
+        data={uniqueBooks}
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={style.listContainer}
@@ -111,6 +131,17 @@ const index = () => {
             </Text>
           </View>
         }
+        ListEmptyComponent={
+          <View style={style.emptyContainer}>
+            <Ionicons
+              name='book-outline'
+              size={60}
+              color={COLORS.textSecondary}
+            />
+            <Text style={style.emptyText}>No books found.</Text>
+          </View>
+        }
+        onEndReached={loadMore}
       />
     </View>
   );
